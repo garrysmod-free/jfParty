@@ -65,6 +65,42 @@ local PARTY_MODE_NIL = 2
 -- if jrParty.Frame then jrParty.Frame:Remove() end
 
 
+-- Listen OnContextMenuOpen and OnContextMenuClose, then reparent to g_ContextMenu or vgui.GetWorldPanel
+hook.Add("OnContextMenuOpen", "jrParty.ContextMenuOpen", function()
+    if IsValid(jrParty.Frame) then
+        jrParty.Frame:SetParent(g_ContextMenu)
+        jrParty.Frame:SetDrawOnTop(true)
+        jrParty.Frame:SetZPos(1000) -- Ensure it is above other context menu items
+        jrParty.Frame:InvalidateLayout(true)
+        jrParty.Frame:InvalidateParent(true)
+        jrParty.Frame:SetMouseInputEnabled(true)
+        jrParty.Frame:RequestFocus()
+    end
+end)
+hook.Add("OnContextMenuClose", "jrParty.ContextMenuClose", function()
+    if IsValid(jrParty.Frame) then
+        jrParty.Frame:SetParent(vgui.GetWorldPanel())
+        jrParty.Frame:InvalidateLayout(true)
+        jrParty.Frame:InvalidateParent(true)
+        jrParty.Frame:SetDrawOnTop(false)
+        jrParty.Frame:SetMouseInputEnabled(true)
+        jrParty.Frame:RequestFocus()
+    end
+end)
+
+-- Hide when SpawnMenu is opened, Show when SpawnMenu is closed
+hook.Add("OnSpawnMenuOpen", "jrParty.SpawnMenuOpen", function()
+    if IsValid(jrParty.Frame) then
+        jrParty.Frame:SetVisible(false)
+    end
+end)
+hook.Add("OnSpawnMenuClose", "jrParty.SpawnMenuClose", function()
+    if IsValid(jrParty.Frame) then
+        jrParty.Frame:SetVisible(true)
+    end
+end)
+
+
 function jrParty.OpenMenu()
     local lsx, lsy = cookie.GetNumber("party_lastx", 0), cookie.GetNumber("party_lasty", 0)
     local w, h = ScrW(), ScrH()
@@ -75,6 +111,12 @@ function jrParty.OpenMenu()
     local fr = vgui.Create("srP_Main")
     jrParty.Frame = fr
     fr:SetSize(x1 * 2, y1 * 6)
+
+
+    -- Check is g_ContextMenu is visible, then SetParent
+    if IsValid(g_ContextMenu) and g_ContextMenu:IsVisible() then
+        fr:SetParent(g_ContextMenu)
+    end
 
     local ps, py = lsx, lsy
     fr:SetPos(ps, py)

@@ -21,6 +21,10 @@ local function Party_Notify(plys, text)
 end
 
 
+-- Server convar for bot automatic accept invites
+jrParty.CVAR_AcceptBots = CreateConVar("jr_party_accept_bots", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Automatically accept party invites for bots")
+
+
 jrParty.InviteLife = 60 -- 60 sec
 
 jrParty.Parties = jrParty.Parties or {}
@@ -212,7 +216,14 @@ function jrParty.Invite(leader, ply)
             net.WriteEntity(leader)
             net.Send(ply)
         else
-            jrParty.Accept(ply, lid)
+            if jrParty.CVAR_AcceptBots:GetBool() then
+                jrParty.Accept(ply, lid)
+            else
+                Party_Notify(leader, "You invited a bot to your party, but it will not accept the invite automatically")
+                if jrParty.Invites[lid][pid] then
+                    jrParty.Invites[lid][pid] = nil -- Remove invite for bot
+                end
+            end
         end
     else
         Party_Notify(leader, "In your party the limit of participants")
