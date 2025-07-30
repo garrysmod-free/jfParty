@@ -12,7 +12,7 @@ jrParty.ESPEnabled = true -- Party ESP Enable/Disable
 jrParty.MarkEnabled = true
 jrParty.MarkTime = 15 -- seconds
 
-jrParty.Limites = { -- Player Members Count Limit
+jrParty.Limites = {   -- Player Members Count Limit
     default = 5,
     user = 5,
     superadmin = 100
